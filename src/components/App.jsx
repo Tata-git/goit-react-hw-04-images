@@ -1,12 +1,11 @@
-import React, { Component } from 'react';
+import { useState, useEffect } from 'react';
 // import { Audio } from 'react-loader-spinner';
-import { getImages } from '../services/api';
+import { getImages, perPage } from '../services/api';
 import { mapperImages } from './Utils/mapper';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Searchbar } from './Searchbar/Searchbar';
 import { Button } from './Button/Button';
 import { Modal } from './Modal/Modal';
-import { perPage } from '../services/api';
 import { AppStyle } from './App.styled';
 
 const Status = {
@@ -15,77 +14,77 @@ const Status = {
   RESOLVED: 'resolved',
   REJECTED: 'rejected',
 };
-export class App extends Component {
-  state = {
-    page: 1,
-    queryValue: '',
-    images: [],
-    status: Status.IDLE,
-    imageModal: '',
-    hasNextPage: false,
-  };
+export const App = () => {
+  const [page, setPage] = useState(1);
+  const [queryValue, setQueryValue] = useState('');
+  const [images, setImages] = useState([]);
+  const [status, setStatus] = useState(Status.IDLE);
+  const [imageModal, setImageModal] = useState('');
+  const [hasNextPage, setHasNextPage] = useState(false);
 
-  componentDidUpdate(_, prevState) {
-    const { queryValue, page } = this.state;
-    // console.log('prevState.page: ', prevState.page);
-    // console.log('page: ', page);
-    // console.log('prevState.queryValue: ', prevState.queryValue);
-    // console.log('queryValue: ', queryValue);
-    if (queryValue !== prevState.queryValue || page !== prevState.page) {
-      // console.log('Изменился queryValue');
+  useEffect(() => {
+    const fetchImages = (queryValue, page) => {
+      console.log(page);
+      console.log(queryValue);
 
-      this.setState({ status: Status.PENDING });
-      this.fetchImages(queryValue, page);
-    }
-  }
+      getImages(queryValue, page)
+        .then(data => {
+          console.log(data);
 
-  fetchImages = (queryValue, page) => {
-    console.log(page);
+          setImages(prevState => [
+            ...prevState.images,
+            ...mapperImages(data.hits),
+          ]);
+          setStatus(Status.RESOLVED);
+          setHasNextPage(page * perPage < data.total);
+        })
+        .catch(error => {
+          setStatus(Status.REJECTED);
+        });
+    };
+    //----------------------------------------
+    if (!queryValue) return;
+    // ---------Status.PENDING---------------
+    setStatus(Status.PENDING);
+
+    // --------- fetchImages ---------------
+    fetchImages();
+  }, [queryValue, page, perPage]);
+
+  const handleSearchBarSubmit = queryValue => {
     console.log(queryValue);
 
-    getImages(queryValue, page).then(data =>
-      this.setState(prevState => ({
-        images: [...prevState.images, ...mapperImages(data.hits)],
-        status: Status.RESOLVED,
-        hasNextPage: page * perPage < data.total,
-      }))
-    );
+    setQueryValue(queryValue);
+    setPage(1);
+    setImages([]);
   };
 
-  handleSearchBarSubmit = queryValue => {
-    console.log(queryValue);
-    this.setState({ queryValue, page: 1, images: [] });
+  const incrementPage = () => {
+    setPage(prevState => prevState.page + 1);
   };
 
-  incrementPage = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
+  const openModal = imageLargeModal => {
+    setImageModal(imageLargeModal);
   };
 
-  openModal = imageLargeModal => {
-    this.setState({ imageModal: imageLargeModal });
+  const closeModal = () => {
+    setImageModal('');
   };
 
-  closeModal = () => {
-    this.setState({ imageModal: '' });
-  };
+  return (
+    <AppStyle>
+      <Searchbar onSubmitApp={handleSearchBarSubmit} />
 
-  render() {
-    const { images, imageModal, hasNextPage } = this.state;
+      <ImageGallery images={images} onLargeImage={openModal} />
 
-    return (
-      <AppStyle>
-        <Searchbar onSubmitApp={this.handleSearchBarSubmit} />
-        <ImageGallery images={images} onLargeImage={this.openModal} />
-        {imageModal && (
-          <Modal imageLargeModal={imageModal} closeModal={this.closeModal} />
-        )}
-        {hasNextPage && (
-          <Button text="Load more" handleClick={this.incrementPage} />
-        )}
-      </AppStyle>
-    );
-  }
-}
+      {imageModal && (
+        <Modal imageLargeModal={imageModal} closeModal={closeModal} />
+      )}
+
+      {hasNextPage && <Button text="Load more" handleClick={incrementPage} />}
+    </AppStyle>
+  );
+};
 
 //-----------------------------
 // {

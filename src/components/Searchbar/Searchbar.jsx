@@ -7,54 +7,49 @@ import {
   SearchButtonStyle,
   SearchFormStyle,
 } from './Searchbar.styled.js';
+import { useState } from 'react';
 
-export class Searchbar extends Component {
-  state = {
-    queryValue: '',
+export const Searchbar = ({ onSubmitApp }) => {
+  const [queryValue, setQueryValue] = useState('');
+
+  const handleChange = e => {
+    setQueryValue(e.currentTarget.value.toLowerCase());
   };
 
-  handleChange = e => {
-    this.setState({ queryValue: e.currentTarget.value.toLowerCase() });
-  };
-
-  handleSubmit = e => {
+  const handleSubmit = e => {
     e.preventDefault();
 
-    if (this.state.queryValue.trim() === '') {
+    if (queryValue.trim() === '') {
       alert('Enter query');
       return;
     }
 
-    this.props.onSubmitApp(this.state.queryValue);
-    this.setState({ queryValue: '' });
+    onSubmitApp(queryValue);
+    setQueryValue('');
   };
 
-  static propTypes = {
-    onSubmitApp: PropTypes.func.isRequired,
-  };
+  return (
+    <SearchbarStyle>
+      <SearchFormStyle onSubmit={handleSubmit}>
+        <SearchButtonStyle type="submit" disabled={queryValue === ''}>
+          <span>
+            <FaSearch />
+          </span>
+        </SearchButtonStyle>
 
-  render() {
-    const { queryValue } = this.state;
+        <SearchInputStyle
+          value={queryValue}
+          onChange={handleChange}
+          type="text"
+          autoComplete="off"
+          autoFocus
+          placeholder="Search images and photos"
+        />
+      </SearchFormStyle>
+    </SearchbarStyle>
+  );
+};
 
-    return (
-      <SearchbarStyle>
-        <SearchFormStyle onSubmit={this.handleSubmit}>
-          <SearchButtonStyle type="submit" disabled={queryValue === ''}>
-            <span>
-              <FaSearch />
-            </span>
-          </SearchButtonStyle>
-
-          <SearchInputStyle
-            value={queryValue}
-            onChange={this.handleChange}
-            type="text"
-            autoComplete="off"
-            autoFocus
-            placeholder="Search images and photos"
-          />
-        </SearchFormStyle>
-      </SearchbarStyle>
-    );
-  }
-}
+Searchbar.propTypes = {
+  onSubmitApp: PropTypes.func.isRequired,
+};

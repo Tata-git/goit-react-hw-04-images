@@ -1,40 +1,34 @@
-import { Component } from 'react';
 import PropTypes from 'prop-types';
 // import { Button } from '../Button/Button';
 import { ModalStyled, Overlay } from './Modal.styled.js';
+import { useEffect } from 'react';
 
-export class Modal extends Component {
-  componentDidMount() {
-    window.addEventListener('keydown', this.onEsc);
-  }
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.onEsc);
-  }
-  onEsc = e => {
-    if (e.code === 'Escape') this.props.closeModal();
-  };
+export const Modal = ({imageLargeModal, closeModal}) => {
 
-  onBackground = e => {
+  useEffect(() => {
+    const onEsc = e => {
+      if (e.code === 'Escape') closeModal();
+    };
+    window.addEventListener('keydown', onEsc);
+    //   window.removeEventListener('keydown', onEsc);
+  });
+
+  const onBackground = e => {
     if (e.currentTarget === e.target) {
-      this.props.closeModal();
+      closeModal();
     }
   };
 
-static propTypes = {
-  imageLargeModal: PropTypes.string.isRequired
-}
+  return (
+    <Overlay onClick={onBackground}>
+      <ModalStyled>
+        <img src={imageLargeModal} alt="" />
+      </ModalStyled>
+    </Overlay>
+  );
+};
 
-  render() {
-    const { imageLargeModal } = this.props;
-    return (
-      <Overlay onClick={this.onBackground}>
-        <ModalStyled>
-          <img src={imageLargeModal} alt="" />
-          {/* <Button text="Close" handleClick={closeModal} /> */}
-        </ModalStyled>
-      </Overlay>
-    );
-  }
-}
-
-
+Modal.propTypes = {
+  imageLargeModal: PropTypes.string.isRequired,
+  closeModal: PropTypes.func.isRequired,
+};
