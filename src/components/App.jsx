@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-// import { Audio } from 'react-loader-spinner';
+import { Hearts } from 'react-loader-spinner';
 import { getImages, perPage } from '../services/api';
 import { mapperImages } from './Utils/mapper';
 import { ImageGallery } from './ImageGallery/ImageGallery';
@@ -31,10 +31,7 @@ export const App = () => {
         .then(data => {
           console.log(data);
 
-          setImages(prevState => [
-            ...prevState.images,
-            ...mapperImages(data.hits),
-          ]);
+          setImages(prevState => [...prevState, ...mapperImages(data.hits)]);
           setStatus(Status.RESOLVED);
           setHasNextPage(page * perPage < data.total);
         })
@@ -49,7 +46,7 @@ export const App = () => {
 
     // --------- fetchImages ---------------
     fetchImages();
-  }, [queryValue, page, perPage]);
+  }, [queryValue, page]);
 
   const handleSearchBarSubmit = queryValue => {
     console.log(queryValue);
@@ -63,6 +60,14 @@ export const App = () => {
     setPage(prevState => prevState.page + 1);
   };
 
+  // function toggleLoading() {
+  //   if (!hasNextPage) {
+  //     setHasNextPage(true);
+  //   } else {
+  //     setHasNextPage(false);
+  //   }
+  // }
+
   const openModal = imageLargeModal => {
     setImageModal(imageLargeModal);
   };
@@ -74,29 +79,22 @@ export const App = () => {
   return (
     <AppStyle>
       <Searchbar onSubmitApp={handleSearchBarSubmit} />
+      {/* {hasNextPage ? (
+        <Hearts color="#00BFFF" height={80} width={80} />
+      ) : (
+        <p>Processing Completed</p>
+      )} */}
 
       <ImageGallery images={images} onLargeImage={openModal} />
 
       {imageModal && (
         <Modal imageLargeModal={imageModal} closeModal={closeModal} />
       )}
+      {/* {hasNextPage && <Button text="Load more" onClick={toggleLoading} />} */}
 
       {hasNextPage && <Button text="Load more" handleClick={incrementPage} />}
     </AppStyle>
   );
 };
 
-//-----------------------------
-// {
-//   status && (
-//     <Audio
-//       height="80"
-//       width="80"
-//       radius="9"
-//       color="green"
-//       ariaLabel="three-dots-loading"
-//       wrapperStyle
-//       wrapperClass
-//     />
-//   );
-// }
+

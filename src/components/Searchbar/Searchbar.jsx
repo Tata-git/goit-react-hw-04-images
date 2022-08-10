@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState } from 'react';
 import { FaSearch } from 'react-icons/fa';
 import PropTypes from 'prop-types';
 import {
@@ -7,7 +7,6 @@ import {
   SearchButtonStyle,
   SearchFormStyle,
 } from './Searchbar.styled.js';
-import { useState } from 'react';
 
 export const Searchbar = ({ onSubmitApp }) => {
   const [queryValue, setQueryValue] = useState('');
