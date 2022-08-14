@@ -82,12 +82,7 @@ export const App = () => {
 
       {isLoading && <Loader />}
 
-      {hasNextPage && (
-        <Button
-          text="Load more"
-          handleClick={incrementPage}
-        />
-      )}
+      {hasNextPage && <Button text="Load more" handleClick={incrementPage} />}
     </AppStyle>
   );
 };
